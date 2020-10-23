@@ -92,17 +92,25 @@ for line in body:
       # Verify if popped item has element attribute
       if item.get('element'):
         if item.get('element') == 'Text':
+          #print(getStackId(), item['index'], item)
+          #print(finalArray[-1])
+          #print(item['index']-1, index)
+          #print(body[item['index']-1], body[index])
           textContent = ''
-          for itemId in range(item['index'], index):
+          for itemId in range(item['index']-1, index):
             textContent = textContent + body[itemId]
-          addText(finalArray[-1], getStackId(), textContent)
+          #addRow(finalArray[-1], getStackId)
+          #addText(finalArray[-1], getStackId(), textContent)
   else:
     if re.search(r'msp39_Content"', line):
       # Regular expresion to body
       stack.append({'id': numElem, 'tag': line.strip().split(' ')[0][1:].split('>')[0], 'index': index + 1})
       canSave = True
-    elif re.search(r'<br>', line):
+    elif re.search(r'<br', line):
       # Skip br tags
+      continue
+    elif re.search(r'<hr', line):
+      # Skip hr tags
       continue
     elif re.search(r'<!--', line):
       # Skip comments
@@ -114,7 +122,7 @@ for line in body:
       # Append tags to stack
       if canSave and len(stack) == 0:
         break
-      elif re.search(r'&nbsp;', line):
+      elif canSave and re.search(r'&nbsp;', line):
         # Skip empty containers
         stack.append({'id': numElem, 'tag': line.strip().split(' ')[0][1:], 'index': index + 1, 'element': 'emptyTag'})
         numElem += 1
@@ -125,23 +133,38 @@ for line in body:
         numElem += 1
       elif len(stack) == 2 and canSave:
         # Add every column
-        stack.append({'id': numElem, 'tag': line.strip().split(' ')[0][1:], 'index': index + 1, 'element': 'column'})
-        finalArray[-1].get('content')[-1].get('content').append({'id': numElem, 'type': 'column', 'size': 'col-lg', 'content': []})
-        numElem += 1
+        if re.search(r'<img', line):
+          # skip img tags
+          continue
+        if re.search(r'id="page\d+_htmltext\d+"', line) or re.search(r'id="page\d+_title\d+"', line):
+          stack.append({'id': numElem, 'tag': line.strip().split(' ')[0][1:], 'index': index + 1, 'element': 'Text'})
+          numElem += 1
+        else:
+          stack.append({'id': numElem, 'tag': line.strip().split(' ')[0][1:], 'index': index + 1, 'element': 'column'})
+          finalArray[-1].get('content')[-1].get('content').append({'id': numElem, 'type': 'column', 'size': 'col-lg', 'content': []})
+          numElem += 1
       elif len(stack) > 2 and canSave and stack[-1].get('flag') == 1:
         # First tags of new rows
-        addRow(finalArray[-1], getStackId())
-        stack.append({'id': numElem, 'tag': line.strip().split(' ')[0][1:], 'index': index + 1, 'element': 'column'})
-        numElem += 1
+        if re.search(r'id="page\d+_htmltext\d+"', line) or re.search(r'id="page\d+_title\d+"', line):
+          stack.append({'id': numElem, 'tag': line.strip().split(' ')[0][1:], 'index': index + 1, 'element': 'Text'})
+          numElem += 1
+        else: 
+          addRow(finalArray[-1], getStackId())
+          stack.append({'id': numElem, 'tag': line.strip().split(' ')[0][1:], 'index': index + 1, 'element': 'column'})
+          numElem += 1
       elif len(stack) > 2 and canSave and re.search(r'id="page\d+_container\d+"', line):
         # Add every row in inner tags
-        addRow(finalArray[-1], getStackId())
-        stack.append({'id': numElem, 'tag': line.strip().split(' ')[0][1:], 'index': index + 1, 'element': 'row', 'flag': 1})
-        numElem += 1
+        if re.search(r'id="page\d+_htmltext\d+"', line) or re.search(r'id="page\d+_title\d+"', line):
+          stack.append({'id': numElem, 'tag': line.strip().split(' ')[0][1:], 'index': index + 1, 'element': 'Text'})
+          numElem += 1
+        else:
+          addRow(finalArray[-1], getStackId())
+          stack.append({'id': numElem, 'tag': line.strip().split(' ')[0][1:], 'index': index + 1, 'element': 'row', 'flag': 1})
+          numElem += 1
       elif len(stack) > 2 and canSave and re.search(r'<img', line):
         # add img tags
         continue
-      elif len(stack) > 2 and canSave and re.search(r'id="page\d+_htmltext\d+"', line):
+      elif len(stack) > 2 and canSave and (re.search(r'id="page\d+_htmltext\d+"', line) or re.search(r'id="page\d+_title\d+"', line)):
         # Add every row in inner tags
         stack.append({'id': numElem, 'tag': line.strip().split(' ')[0][1:], 'index': index + 1, 'element': 'Text'})
         numElem += 1
