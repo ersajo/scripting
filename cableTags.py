@@ -15,9 +15,9 @@ from bson.objectid import ObjectId
 from datetime import datetime
 
 # conexión
-con = MongoClient('server2.monadic.solutions', 27017, authSource='new_monadic_test',
-                  username='freyjaUser', password='B12030103', authMechanism='SCRAM-SHA-1')
-db = con.new_monadic_test
+con = MongoClient('server2.monadic.solutions', 27017, authSource='cablenetworks_test',
+                  username='freyjaUser', password='freyjaPass', authMechanism='SCRAM-SHA-1')
+db = con.cablenetworks_test
 
 tagCode = 0
 tagsCollection = db.tags
