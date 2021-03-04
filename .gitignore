@@ -131,3 +131,6 @@ dmypy.json
 */
 *.pdf
 output.*
+*.csv
+*.xlsx
+*.txt

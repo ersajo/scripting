@@ -22,7 +22,10 @@ collection = db.products
 csvFile = open(sys.argv[1], 'r')
 for line in csvFile.read().split('\n')[1:-1]:
   values = line.split(',')
-  # print(values[0], values[7])
-  result = collection.find_one({'code': int(values[0])})
-  updated = collection.update_one({'_id': result["_id"]}, {'$set': {'buyPrice': float(values[7])}}, upsert=False)
-  print(result['code'], result['_id'], result['name'], values[7])
+  # print(values[0], values[1])
+  result = collection.find_one({'sku': values[0]})
+  if (result):
+    updated = collection.update_one({'_id': result["_id"]}, {'$set': {'buyPrice': float(values[1][1:])}}, upsert=False)
+    print(result['code'], result['sku'], result['name'], values[1])
+  else:
+    print(values[0], "Error")
